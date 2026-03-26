@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CorpAdmin — Portail RH</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f4f5f7;
+      --surface: #ffffff;
+      --surface2: #f8f9fa;
+      --border: #e2e4e9;
+      --accent: #1a56db;
+      --accent-light: #ebf0fd;
+      --text: #111928;
+      --muted: #6b7280;
+      --danger: #e02424;
+      --danger-bg: #fdf2f2;
+      --danger-border: #fbd5d5;
+      --success: #057a55;
+      --success-bg: #f3faf7;
+      --font: 'Segoe UI', system-ui, sans-serif;
+      --mono: 'Courier New', monospace;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent);
+      letter-spacing: -0.01em;
+    }
+    .nav-brand-icon {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px; font-weight: 700;
+    }
+    .nav-user {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.8rem; color: var(--muted);
+    }
+    .nav-badge {
+      background: #fef3c7; color: #92400e;
+      border: 1px solid #fcd34d;
+      border-radius: 100px;
+      font-size: 0.65rem; padding: 0.15rem 0.55rem;
+      font-weight: 600; letter-spacing: 0.04em;
+    }
+
+    /* SIDEBAR */
+    .layout { display: flex; min-height: calc(100vh - 56px); }
+    .sidebar {
+      width: 220px; min-width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.25rem 0;
+    }
+    .sidebar-section {
+      font-size: 0.65rem; color: var(--muted);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0 1.25rem; margin-bottom: 0.4rem; margin-top: 1rem;
+    }
+    .sidebar-section:first-child { margin-top: 0; }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.85rem; color: var(--muted);
+      cursor: default; border-left: 2px solid transparent;
+    }
+    .sidebar-item.active {
+      color: var(--accent); background: var(--accent-light);
+      border-left-color: var(--accent);
+    }
+    .sidebar-icon { font-size: 14px; width: 16px; text-align: center; }
+
+    /* MAIN */
+    .main { flex: 1; padding: 2rem; max-width: 900px; }
+    .page-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .page-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.75rem; }
+
+    /* SEARCH BAR */
+    .search-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex; gap: 0.75rem; align-items: flex-end;
+    }
+    .search-field { flex: 1; }
+    .search-field label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .search-field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.55rem 0.85rem;
+      font-family: var(--font);
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+    .search-btn {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 6px;
+      padding: 0.55rem 1.25rem;
+      font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .search-btn:hover { opacity: 0.88; }
+
+    /* RESULTS TABLE */
+    .results-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .results-header {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .results-title { font-size: 0.8rem; font-weight: 600; }
+    .results-count {
+      font-size: 0.72rem; color: var(--muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 100px; padding: 0.15rem 0.6rem;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: var(--surface2); }
+    th {
+      text-align: left; padding: 0.65rem 1.25rem;
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 0.7rem 1.25rem;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
+    .dept-badge {
+      font-size: 0.7rem; padding: 0.15rem 0.55rem;
+      border-radius: 100px; font-weight: 500;
+    }
+    .dept-IT { background: #ede9fe; color: #5b21b6; }
+    .dept-RH { background: #fce7f3; color: #9d174d; }
+    .dept-Compta { background: #ecfdf5; color: #065f46; }
+    .dept-Dir { background: #fff7ed; color: #92400e; }
+
+    /* EMPTY / ERROR STATE */
+    .state-box {
+      padding: 2.5rem 1.25rem; text-align: center;
+    }
+    .state-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .state-text { font-size: 0.85rem; color: var(--muted); }
+
+    /* ERROR SQL BOX */
+    .error-box {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .error-title {
+      font-size: 0.75rem; font-weight: 700; color: var(--danger);
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .error-label {
+      font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 0.25rem; margin-top: 0.75rem;
+    }
+    .error-label:first-of-type { margin-top: 0; }
+    .error-value {
+      font-family: var(--mono);
+      font-size: 0.8rem; color: var(--danger);
+      background: #fff5f5; border: 1px solid var(--danger-border);
+      border-radius: 4px; padding: 0.5rem 0.75rem;
+      word-break: break-all; line-height: 1.5;
+    }
+    .error-value.query-val { color: #374151; }
+
+    /* PLACEHOLDER */
+    .placeholder-state { padding: 3rem 1.25rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
+
+    .footer-note { font-size: 0.65rem; color: var(--muted); margin-top: 1.5rem; opacity: 0.6; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-brand-icon">C</div>
+      CorpAdmin
+    </div>
+    <div class="nav-user">
+      <span>admin@corp.io</span>
+      <span class="nav-badge">ADMIN</span>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-section">Principal</div>
+      <div class="sidebar-item">
+        <span class="sidebar-icon">&#9632;</span> Tableau de bord
+      </div>
+      <div class="sidebar-section">Ressources humaines</div>
+      <div class="sidebar-item active">
+        <span class="sidebar-icon">&#9654;</span> Annuaire employés
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-icon">&#9632;</span> Fiches de paie
+      </div>
+      <div class="sidebar-section">Système</div>
+      <div class="sidebar-item">
+        <span class="sidebar-icon">&#9632;</span> Journaux d'accès
+      </div>
+      <div class="sidebar-item">
+        <span class="sidebar-icon">&#9632;</span> Configuration
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="page-title">Annuaire des employés</div>
+      <div class="page-sub">Recherchez un employé par nom dans la base de données RH.</div>
+
+      <div class="search-bar">
+        <div class="search-field">
+          <label>Nom de l'employé</label>
+          <input type="text" id="searchInput" placeholder="ex: Martin, Durand..." autocomplete="off">
+        </div>
+        <button class="search-btn" onclick="doSearch()">Rechercher</button>
+      </div>
+
+      <div id="errorBox" style="display:none;"></div>
+
+      <div class="results-card">
+        <div class="results-header">
+          <span class="results-title">Résultats</span>
+          <span class="results-count" id="countBadge">—</span>
+        </div>
+        <div id="tableArea">
+          <div class="placeholder-state">Lancez une recherche pour afficher les employés.</div>
+        </div>
+      </div>
+
+      <div class="footer-note">CTFY 2024 — Web Challenge #3 — 150 pts</div>
+    </div>
+  </div>
+
+  <script>
+    const deptClass = {
+      'Informatique': 'dept-IT',
+      'RH': 'dept-RH',
+      'Comptabilité': 'dept-Compta',
+      'Direction': 'dept-Dir',
+    };
+
+    async function doSearch() {
+      const q = document.getElementById('searchInput').value;
+      const errorBox = document.getElementById('errorBox');
+      const tableArea = document.getElementById('tableArea');
+      const countBadge = document.getElementById('countBadge');
+
+      errorBox.style.display = 'none';
+      errorBox.innerHTML = '';
+      tableArea.innerHTML = '<div class="placeholder-state">Chargement...</div>';
+      countBadge.textContent = '—';
+
+      if (!q) {
+        tableArea.innerHTML = '<div class="placeholder-state">Lancez une recherche pour afficher les employés.</div>';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/.netlify/functions/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          errorBox.style.display = 'block';
+          errorBox.innerHTML = `
+            <div class="error-box">
+              <div class="error-title">&#9888; Erreur SQL — code ${res.status}</div>
+              <div class="error-label">Message</div>
+              <div class="error-value">${escHtml(data.details || data.error)}</div>
+              <div class="error-label">Requête exécutée</div>
+              <div class="error-value query-val">${escHtml(data.query || '')}</div>
+            </div>`;
+          tableArea.innerHTML = '';
+          countBadge.textContent = 'Erreur';
+          return;
+        }
+
+        countBadge.textContent = data.count + ' résultat' + (data.count > 1 ? 's' : '');
+
+        if (data.results.length === 0) {
+          tableArea.innerHTML = '<div class="state-box"><div class="state-icon">&#128269;</div><div class="state-text">Aucun employé trouvé.</div></div>';
+          return;
+        }
+
+        let rows = data.results.map(r => `
+          <tr>
+            <td>${escHtml(String(r.id))}</td>
+            <td>${escHtml(r.name)}</td>
+            <td><span class="dept-badge ${deptClass[r.department] || ''}">${escHtml(r.department)}</span></td>
+            <td>${escHtml(r.email)}</td>
+          </tr>`).join('');
+
+        tableArea.innerHTML = `
+          <table>
+            <thead><tr>
+              <th>#</th><th>Nom</th><th>Département</th><th>Email</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+
+      } catch (e) {
+        tableArea.innerHTML = '<div class="state-box"><div class="state-icon">&#9888;</div><div class="state-text">Erreur de connexion au serveur.</div></div>';
+      }
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSearch();
+    });
+  </script>
+</body>
+</html>
